@@ -38,30 +38,81 @@ clear after playing a few rounds.
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
+I used GitHub Copilot in VS Code throughout this project. I used it 
+mainly through the Chat view and Inline Chat to explain code and 
+suggest fixes.
+
+One correct suggestion Copilot gave me was explaining exactly why the 
+hints were wrong on even attempts. When I asked it to explain the 
+string conversion block in app.py, it walked me through how Python 
+compares strings using lexicographical order instead of numeric order, 
+giving concrete examples like "2" > "10" being True in Python. I 
+verified this was correct by reading the code myself and confirming 
+the fix worked in the live game after removing the str() conversion.
+
+One misleading suggestion Copilot gave me was when it initially 
+suggested keeping the TypeError fallback branch inside check_guess. 
+It framed this as a safety net for unexpected input types. I rejected 
+this because the fallback was actually part of the problem - it 
+silently handled the broken string comparison instead of surfacing the 
+real bug. The right fix was to remove the str() conversion entirely so 
+check_guess never received a string in the first place.
 
 ---
 
 ## 3. Debugging and testing your fixes
 
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
+I decided a bug was really fixed when two things were both true: the 
+pytest test for that function passed, and I could manually reproduce 
+the correct behavior in the live Streamlit app.
+
+For the hint logic bug, I wrote a test called test_check_guess_too_high 
+that calls check_guess(80, 50) and checks that the outcome is "Too High" 
+and the message contains "LOWER". Before the fix this would have failed 
+because the string comparison returned wrong results. After removing the 
+str() conversion and simplifying check_guess, all 15 tests passed.
+
+Copilot helped me understand what to test by explaining which inputs 
+triggered the broken behavior. It pointed out that even-numbered 
+attempts were the specific failure point, which helped me design a test 
+that targeted exactly that scenario rather than just testing the happy 
+path.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+Streamlit works differently from most apps - every time you click a 
+button or interact with anything on the page, the entire Python script 
+runs again from top to bottom. This is called a rerun. That means any 
+regular variable you create gets reset to its starting value on every 
+single click.
+
+Session state is how you keep information alive across those reruns. 
+It works like a dictionary that Streamlit saves between runs. If you 
+store something in st.session_state, it survives the rerun and keeps 
+its value. If you don't, it disappears. That's why the attempt counter 
+and secret number had to be stored in session_state - otherwise they 
+would reset every time the player clicked Submit.
 
 ---
 
 ## 5. Looking ahead: your developer habits
 
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+One habit I want to keep is adding FIXME comments before touching any 
+code. It forced me to think clearly about where the bug actually was 
+before jumping into a fix, and it gave me a specific place to reference 
+when asking Copilot for help. That kind of intentional marking made the 
+whole debugging process feel more organized.
+
+Next time I work with AI on a coding task I would ask for smaller, more 
+targeted suggestions from the start. A few times Copilot suggested 
+changes that touched more code than necessary, and reviewing large diffs 
+is easy to rush. Asking for the smallest possible fix each time would 
+make it easier to verify each change carefully.
+
+This project changed how I think about AI-generated code - I used to 
+assume that if the code ran without crashing it was probably correct, 
+but now I understand that subtle logic bugs can hide in plain sight and 
+only show up in specific situations, which is exactly why tests and 
+human review matter even when the AI sounds confident.
