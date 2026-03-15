@@ -59,9 +59,8 @@ automated pytest tests.
 
 ## 📸 Demo
 
-![Winning game](winning_game.png)
-
-![Pytest results](pytest_results.png)
+![Winning game !!!](winning_game.png)
+![Pytest results...](pytest_results.png)
 
 ## 🚀 Stretch Features
 
