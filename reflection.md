@@ -3,10 +3,36 @@
 Answer each question in 3 to 5 sentences. Be specific and honest about what actually happened while you worked. This is about your process, not trying to sound perfect.
 
 ## 1. What was broken when you started?
+When I first ran the game, it appeared to work normally, but several bugs became 
+clear after playing a few rounds.
 
-- What did the game look like the first time you ran it?
-- List at least two concrete bugs you noticed at the start  
-  (for example: "the hints were backwards").
+1. Hint logic bug (even attempts)
+   Expected: when my guess was higher than the secret number, the game would say 
+   "Too High", and when lower it would say "Too Low" - on every attempt.
+   Actual: on every even-numbered attempt (2, 4, 6...), the secret number was 
+   secretly converted to a string inside app.py. This caused Python to compare an 
+   integer against a string, which broke the hint logic and could give completely 
+   wrong directions.
+
+2. Attempt counter starts at 1 instead of 0
+   Expected: the first guess I submitted should count as attempt 1.
+   Actual: the counter was initialized to 1 in session_state, so after clicking 
+   Submit once it jumped to 2. This means the player silently loses one attempt 
+   before they even start guessing.
+
+3. New Game ignores difficulty setting
+   Expected: clicking New Game while on Hard mode should generate a secret number 
+   within the Hard difficulty range.
+   Actual: the New Game button always called random.randint(1, 100) regardless of 
+   the difficulty selected in the sidebar, so the difficulty setting had no real 
+   effect on new games.
+
+4. Hint messages were swapped
+   Expected: "Too High" should tell me to guess lower, "Too Low" should 
+   tell me to guess higher.
+   Actual: the emoji and direction text were backwards - Too High said 
+   "Go HIGHER" and Too Low said "Go LOWER", pointing the player in the 
+   wrong direction every time.
 
 ---
 
