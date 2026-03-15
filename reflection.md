@@ -37,82 +37,33 @@ clear after playing a few rounds.
 ---
 
 ## 2. How did you use AI as a teammate?
+I used GitHub Copilot in VS Code throughout the project, mainly through the Chat view and Inline Chat to explain code and suggest possible fixes.
 
-I used GitHub Copilot in VS Code throughout this project. I used it 
-mainly through the Chat view and Inline Chat to explain code and 
-suggest fixes.
+One correct suggestion Copilot gave me was explaining why the hints were wrong on even-numbered attempts. When I asked it to explain the string conversion block in app.py, it walked me through how Python compares strings using lexicographical order instead of numeric order, giving examples such as "2" > "10" evaluating to True. I verified this explanation by reviewing the code and confirming that removing the str() conversion fixed the issue in the running game.
 
-One correct suggestion Copilot gave me was explaining exactly why the 
-hints were wrong on even attempts. When I asked it to explain the 
-string conversion block in app.py, it walked me through how Python 
-compares strings using lexicographical order instead of numeric order, 
-giving concrete examples like "2" > "10" being True in Python. I 
-verified this was correct by reading the code myself and confirming 
-the fix worked in the live game after removing the str() conversion.
-
-One misleading suggestion Copilot gave me was when it initially 
-suggested keeping the TypeError fallback branch inside check_guess. 
-It framed this as a safety net for unexpected input types. I rejected 
-this because the fallback was actually part of the problem - it 
-silently handled the broken string comparison instead of surfacing the 
-real bug. The right fix was to remove the str() conversion entirely so 
-check_guess never received a string in the first place.
+One misleading suggestion Copilot made was recommending that I keep the TypeError fallback branch inside check_guess. It described this as a safety mechanism for unexpected input types. I rejected this suggestion because the fallback was masking the real bug rather than fixing it. The correct solution was to remove the unnecessary str() conversion so check_guess would always receive numeric inputs.
 
 ---
 
 ## 3. Debugging and testing your fixes
+I considered a bug fully fixed only when two things were true: the related pytest test passed, and I could reproduce the correct behavior in the live Streamlit application.
 
-I decided a bug was really fixed when two things were both true: the 
-pytest test for that function passed, and I could manually reproduce 
-the correct behavior in the live Streamlit app.
+For the hint logic bug, I wrote a test called test_check_guess_too_high that calls check_guess(80, 50) and verifies that the outcome is "Too High" and the message contains "LOWER". Before the fix, this scenario could produce incorrect results due to the string comparison. After removing the str() conversion and simplifying the check_guess logic, all 15 tests passed.
 
-For the hint logic bug, I wrote a test called test_check_guess_too_high 
-that calls check_guess(80, 50) and checks that the outcome is "Too High" 
-and the message contains "LOWER". Before the fix this would have failed 
-because the string comparison returned wrong results. After removing the 
-str() conversion and simplifying check_guess, all 15 tests passed.
-
-Copilot helped me understand what to test by explaining which inputs 
-triggered the broken behavior. It pointed out that even-numbered 
-attempts were the specific failure point, which helped me design a test 
-that targeted exactly that scenario rather than just testing the happy 
-path.
+Copilot helped me understand what cases to test by explaining which inputs triggered the bug. It pointed out that even-numbered attempts were the specific failure point, which helped me design tests targeting that scenario instead of only testing normal cases.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
+Streamlit behaves differently from many traditional applications because the entire script reruns from top to bottom every time a user interacts with the interface. This means that regular variables are reset each time a button is clicked or an input changes.
 
-Streamlit works differently from most apps - every time you click a 
-button or interact with anything on the page, the entire Python script 
-runs again from top to bottom. This is called a rerun. That means any 
-regular variable you create gets reset to its starting value on every 
-single click.
-
-Session state is how you keep information alive across those reruns. 
-It works like a dictionary that Streamlit saves between runs. If you 
-store something in st.session_state, it survives the rerun and keeps 
-its value. If you don't, it disappears. That's why the attempt counter 
-and secret number had to be stored in session_state - otherwise they 
-would reset every time the player clicked Submit.
+Session state allows values to persist across these reruns. It works like a dictionary that Streamlit maintains between executions. When values such as the secret number or attempt counter are stored in st.session_state, they survive reruns and maintain the game’s progress. Without session state, these values would reset each time the user clicked Submit.
 
 ---
 
 ## 5. Looking ahead: your developer habits
+One habit I want to keep is adding FIXME comments before modifying any code. This forced me to think carefully about where the bug actually originated before attempting a fix, and it gave me a clear reference point when asking Copilot for help. It made the debugging process feel much more structured.
 
-One habit I want to keep is adding FIXME comments before touching any 
-code. It forced me to think clearly about where the bug actually was 
-before jumping into a fix, and it gave me a specific place to reference 
-when asking Copilot for help. That kind of intentional marking made the 
-whole debugging process feel more organized.
+In future AI-assisted coding tasks, I would ask for smaller and more targeted suggestions from the start. Copilot sometimes suggested changes that touched more code than necessary, and reviewing large diffs can make it easy to overlook subtle problems. Requesting minimal fixes would make each change easier to verify.
 
-Next time I work with AI on a coding task I would ask for smaller, more 
-targeted suggestions from the start. A few times Copilot suggested 
-changes that touched more code than necessary, and reviewing large diffs 
-is easy to rush. Asking for the smallest possible fix each time would 
-make it easier to verify each change carefully.
-
-This project changed how I think about AI-generated code - I used to 
-assume that if the code ran without crashing it was probably correct, 
-but now I understand that subtle logic bugs can hide in plain sight and 
-only show up in specific situations, which is exactly why tests and 
-human review matter even when the AI sounds confident.
+This project also changed how I think about AI-generated code. I used to assume that if the code ran without crashing, it was probably correct. Now I understand that subtle logic bugs can exist even when the program appears to work, which is why testing and human review are still essential even when AI suggestions seem confident.
